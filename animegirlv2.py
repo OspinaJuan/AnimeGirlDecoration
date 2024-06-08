@@ -35,13 +35,33 @@ class movingImage(QLabel):
 	def move_up(self):
 		self.move(self.x(), self.y() - 3)
 
+	def is_at_x_right_edge(self):
+		if self.x() >= 1266:
+			return True
+		return False
+
+	def is_at_y_up_edge(self):
+		if self.y() <= 25:
+			return True
+		return False
+
+	def is_at_y_bottom_edge(self):
+		if self.y() > 668:
+			return True
+		return False
+
+	def is_at_x_left_edge(self):
+		if self.x() <= 0:
+			return True
+		return False
+
 	def movement(self):
-		if self.x() < self.screen.width() - 100 and self.y() == 25:
+		if not self.is_at_x_right_edge() and self.is_at_y_up_edge():
 			self.move_right()
-		elif self.y() < self.screen.height() - 100 and self.x() > 100:
+		elif not self.is_at_y_bottom_edge() and self.is_at_x_right_edge():
 			self.move_down()
 		else:
-			if self.x() > 0:
+			if not self.is_at_x_left_edge():
 				self.move_left()
 			else:
 				self.move_up()
