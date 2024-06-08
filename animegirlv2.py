@@ -23,20 +23,32 @@ class movingImage(QLabel):
 		self.timer.timeout.connect(self.movement)
 		self.timer.start(10)
 
+	def move_right(self):
+		self.move(self.x() + 3, self.y())
+
+	def move_left(self):
+		self.move(self.x() - 3, self.y())
+
+	def move_down(self):
+		self.move(self.x(), self.y() + 3)
+
+	def move_up(self):
+		self.move(self.x(), self.y() - 3)
+
 	def movement(self):
 		if self.x() < self.screen.width() - 100 and self.y() == 25:
-			self.move(self.x() + 3, 0)
+			self.move_right()
 		elif self.y() < self.screen.height() - 100 and self.x() > 100:
-			self.move(self.x(), self.y() + 3)
+			self.move_down()
 		else:
 			if self.x() > 0:
-				self.move(self.x() - 3, self.y())
+				self.move_left()
 			else:
-				self.move(self.x(), self.y() - 3)
+				self.move_up()
 
 	def mousePressEvent(self, event):
 		if event.button() == Qt.LeftButton:
-			my_sound = pygame.mixer.Sound('/home/pony/Documents/coding/animegirlsound.wav')
+			my_sound = pygame.mixer.Sound('animegirlsound.wav')
 			my_sound.play()
 			self.hide()
 			time.sleep(1)
