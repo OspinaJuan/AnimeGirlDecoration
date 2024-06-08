@@ -60,11 +60,10 @@ class movingImage(QLabel):
 			self.move_right()
 		elif not self.is_at_y_bottom_edge() and self.is_at_x_right_edge():
 			self.move_down()
-		else:
-			if not self.is_at_x_left_edge():
-				self.move_left()
-			else:
-				self.move_up()
+		elif not self.is_at_x_left_edge() and self.is_at_y_bottom_edge():
+			self.move_left()
+		elif self.is_at_x_left_edge() and not self.is_at_y_up_edge():
+			self.move_up()
 
 	def mousePressEvent(self, event):
 		if event.button() == Qt.LeftButton:
