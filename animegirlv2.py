@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QLabel, QDesktopWidget
 from PyQt5.QtCore import Qt, QTimer, QUrl
-from PyQt5.QtGui import QPixmap, QCursor
+from PyQt5.QtGui import QPixmap, QCursor, QMovie
 from PyQt5.QtMultimedia import QSound
 import sys
 import time
@@ -13,14 +13,16 @@ class movingImage(QLabel):
 		super().__init__()
 		self.screen = QDesktopWidget().screenGeometry()
 		self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)
-		self.setPixmap(QPixmap("animegirl.png"))
-		self.setGeometry(0,0,100,100)
+		self.movie = QMovie("padoru.gif")
+		self.setMovie(self.movie)
+		self.movie.start()
+		self.setGeometry(0,0,80,80)
 		self.setAttribute(Qt.WA_TranslucentBackground)
 		self.setAttribute(Qt.WA_NoSystemBackground, True)
 		self.setScaledContents(True)
 
 		self.checkProximityTimer = QTimer(self)
-		self.checkProximityTimer.timeout.connect(self.checkProximity)
+		self.checkProximityTimer.timeout.connect(self.checkFrontalProximity)
 		self.checkProximityTimer.start(100)
 
 		self.movementClockwiseTimer = QTimer(self)
@@ -38,7 +40,7 @@ class movingImage(QLabel):
 		self.movementCounterclockwiseTimer.stop()
 		self.movementClockwiseTimer.start(10)
 
-	def checkProximity(self):
+	def checkFrontalProximity(self):
 		pos = QCursor.pos()
 		center_x = self.x() + self.size().width() / 2
 		center_y = self.y() + self.size().height() / 2
@@ -65,18 +67,48 @@ class movingImage(QLabel):
 					self.reverseMovementToCounter()
 				elif self.movementCounterclockwiseTimer.isActive() and self.is_at_x_left_edge():
 					self.reverseMovementToClockwise()
+	
+	def checkBackProximity(self):
+		pos = QCursor.pos()
+		center_x = self.x() + self.size().width() / 2
+		center_y = self.y() + self.size().height() / 2
+		proximity = min(abs(center_x - pos.x()), abs(center_y - pos.y()))
 
-	def move_right(self):
-		self.move(self.x() + 3, self.y())
+		if abs(center_x - pos.x()) < 150 and abs(center_y - pos.y()) < 60:
+			if center_x - pos.x() > 0 and ((self.movementClockwiseTimer.isActive() and self.is_at_y_up_edge()) or (self.movementCounterclockwiseTimer.isActive() and self.is_at_y_bottom_edge())) :	
+				if 50 < proximity < 200:
+					return 5
+				elif proximity < 50:
+					return 7
+			elif center_x - pos.x() < 0 and ((self.movementClockwiseTimer.isActive() and self.is_at_y_bottom_edge()) or (self.movementCounterclockwiseTimer.isActive() and self.is_at_y_up_edge())):
+				if 50 < proximity < 200:
+					return 5
+				elif proximity < 50:
+					return 7
+		if abs(center_x - pos.x()) < 60 and abs(center_y - pos.y()) < 150:
+			if center_y - pos.y() > 0 and ((self.movementClockwiseTimer.isActive() and self.is_at_x_right_edge()) or (self.movementCounterclockwiseTimer.isActive() and self.is_at_x_left_edge())) :	
+				if 50 < proximity < 200:
+					return 5
+				elif proximity < 50:
+					return 7
+			elif center_y - pos.y() < 0 and ((self.movementClockwiseTimer.isActive() and self.is_at_x_left_edge()) or (self.movementCounterclockwiseTimer.isActive() and self.is_at_x_right_edge())):
+				if 50 < proximity < 200:
+					return 5
+				elif proximity < 50:
+					return 7
+		return 3
 
-	def move_left(self):
-		self.move(self.x() - 3, self.y())
+	def move_right(self, speed):
+		self.move(self.x() + speed, self.y())
 
-	def move_down(self):
-		self.move(self.x(), self.y() + 3)
+	def move_left(self, speed):
+		self.move(self.x() - speed, self.y())
 
-	def move_up(self):
-		self.move(self.x(), self.y() - 3)
+	def move_down(self, speed):
+		self.move(self.x(), self.y() + speed)
+
+	def move_up(self, speed):
+		self.move(self.x(), self.y() - speed)
 
 	def is_at_x_right_edge(self):
 		if self.x() >= 1266:
@@ -99,24 +131,26 @@ class movingImage(QLabel):
 		return False
 
 	def movement_clockwise(self):
+		speed = self.checkBackProximity()
 		if not self.is_at_x_right_edge() and self.is_at_y_up_edge():
-			self.move_right()
+			self.move_right(speed)
 		elif not self.is_at_y_bottom_edge() and self.is_at_x_right_edge():
-			self.move_down()
+			self.move_down(speed)
 		elif not self.is_at_x_left_edge() and self.is_at_y_bottom_edge():
-			self.move_left()
+			self.move_left(speed)
 		elif self.is_at_x_left_edge() and not self.is_at_y_up_edge():
-			self.move_up()
+			self.move_up(speed)
 
 	def movement_counterclockwise(self):
+		speed = self.checkBackProximity()
 		if not self.is_at_x_left_edge() and self.is_at_y_up_edge():
-			self.move_left()
+			self.move_left(speed)
 		elif not self.is_at_y_up_edge() and self.is_at_x_right_edge():
-			self.move_up()
+			self.move_up(speed)
 		elif not self.is_at_x_right_edge() and self.is_at_y_bottom_edge():
-			self.move_right()
+			self.move_right(speed)
 		elif self.is_at_x_left_edge() and not self.is_at_y_bottom_edge():
-			self.move_down()
+			self.move_down(speed)
 
 	def mousePressEvent(self, event):
 		if event.button() == Qt.LeftButton:
