@@ -72,30 +72,33 @@ class movingImage(QLabel):
 		pos = QCursor.pos()
 		center_x = self.x() + self.size().width() / 2
 		center_y = self.y() + self.size().height() / 2
-		proximity = min(abs(center_x - pos.x()), abs(center_y - pos.y()))
+		proximity = max(abs(center_x - pos.x()), abs(center_y - pos.y()))
 
-		if abs(center_x - pos.x()) < 150 and abs(center_y - pos.y()) < 60:
-			if center_x - pos.x() > 0 and ((self.movementClockwiseTimer.isActive() and self.is_at_y_up_edge()) or (self.movementCounterclockwiseTimer.isActive() and self.is_at_y_bottom_edge())) :	
+		if (((abs(center_x - pos.x()) < 200 and abs(center_y - pos.y()) < 60) and
+		   ((center_x - pos.x() > 0 and 
+		   ((self.movementClockwiseTimer.isActive() and 
+		   self.is_at_y_up_edge()) or 
+		   (self.movementCounterclockwiseTimer.isActive() and 
+		   self.is_at_y_bottom_edge()))) or 
+		   (center_x - pos.x() < 0 and 
+		   ((self.movementClockwiseTimer.isActive() and 
+		   self.is_at_y_bottom_edge()) or 
+		   (self.movementCounterclockwiseTimer.isActive() and 
+		   self.is_at_y_up_edge()))))) or
+		   ((abs(center_x - pos.x()) < 60 and abs(center_y - pos.y()) < 200) and
+		   ((center_y - pos.y() > 0 and 
+		   ((self.movementClockwiseTimer.isActive() and 
+		   self.is_at_x_right_edge()) or 
+		   (self.movementCounterclockwiseTimer.isActive() and self.is_at_x_left_edge()))) or 
+		   (center_y - pos.y() < 0 and 
+		   ((self.movementClockwiseTimer.isActive() and 
+		   self.is_at_x_left_edge()) or 
+		   (self.movementCounterclockwiseTimer.isActive() and 
+		   self.is_at_x_right_edge())))))):
 				if 50 < proximity < 200:
-					return 5
+					return  round(-(1/50) * proximity + 8)
 				elif proximity < 50:
-					return 7
-			elif center_x - pos.x() < 0 and ((self.movementClockwiseTimer.isActive() and self.is_at_y_bottom_edge()) or (self.movementCounterclockwiseTimer.isActive() and self.is_at_y_up_edge())):
-				if 50 < proximity < 200:
-					return 5
-				elif proximity < 50:
-					return 7
-		if abs(center_x - pos.x()) < 60 and abs(center_y - pos.y()) < 150:
-			if center_y - pos.y() > 0 and ((self.movementClockwiseTimer.isActive() and self.is_at_x_right_edge()) or (self.movementCounterclockwiseTimer.isActive() and self.is_at_x_left_edge())) :	
-				if 50 < proximity < 200:
-					return 5
-				elif proximity < 50:
-					return 7
-			elif center_y - pos.y() < 0 and ((self.movementClockwiseTimer.isActive() and self.is_at_x_left_edge()) or (self.movementCounterclockwiseTimer.isActive() and self.is_at_x_right_edge())):
-				if 50 < proximity < 200:
-					return 5
-				elif proximity < 50:
-					return 7
+					return 10
 		return 3
 
 	def move_right(self, speed):
